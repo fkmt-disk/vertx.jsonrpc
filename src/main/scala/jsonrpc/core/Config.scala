@@ -12,11 +12,9 @@ class Config(json: JsonObject) {
   val workers = {
     val workers = json.getObject("workers")
     workers.getFieldNames.map { name =>
-      (name, new WorkerConfig(workers.getObject(name)))
-    }.toMap
+      new WorkerConfig(workers.getObject(name))
+    }.toList
   }
-  
-  
   
 }
 
@@ -26,9 +24,14 @@ class WorkerConfig(json: JsonObject) {
   
   val config = json.getObject("config")
   
-  val instances = json.getInteger("instances") match {
-    case null => 1
-    case x    => x
+  val instances: Int = json.getInteger("instances") match {
+    case null       => 1
+    case x: Integer => x
+  }
+  
+  val name = config match {
+    case null             => "noname"
+    case json: JsonObject => json.getString("name", "noname")
   }
   
 }

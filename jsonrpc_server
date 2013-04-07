@@ -1,8 +1,8 @@
 #!/bin/sh
 
-JAVA_HOME=/opt/jdk1.7.0_13
+JAVA_HOME=/opt/jdk1.7.0_17
 
-SCALA_HOME=/opt/scala-2.10.0
+SCALA_HOME=/opt/scala-2.10.1
 
 VERTX_HOME=/opt/vert.x-1.3.1.final
 
