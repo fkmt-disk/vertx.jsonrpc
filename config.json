@@ -1,0 +1,11 @@
+{
+  "port": 9000,
+  "charset": "utf-8",
+  "workers": {
+    "add": {
+      "class_name": "jsonrpc.sample.AddService",
+      "config": {},
+      "instances": 1
+    }
+  }
+}

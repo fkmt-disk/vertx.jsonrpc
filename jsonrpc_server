@@ -1,0 +1,81 @@
+#!/bin/sh
+
+JAVA_HOME=/opt/jdk1.7.0_13
+
+SCALA_HOME=/opt/scala-2.10.0
+
+VERTX_HOME=/opt/vert.x-1.3.1.final
+
+TMPDIR=`readlink -f $(dirname $0)`/tmp
+
+CONFIG=./config.json
+
+CLASSPATH=$SCALA_HOME/lib/scala-library.jar:target/scala-2.10/classes
+
+BASENAME=`basename $0`
+
+start() {
+  if [ -e $TMPDIR/$BASENAME.pid ]; then
+    echo "server already running"
+    return 1
+  fi
+  
+  echo "JAVA_HOME="$JAVA_HOME
+  echo "SCALA_HOME="$SCALA_HOME
+  echo "VERTX_HOME="$VERTX_HOME
+  echo "CONFIG="$CONFIG
+  echo "CLASSPATH="$CLASSPATH
+  echo "TMPDIR="$TMPDIR
+  
+  nohup $VERTX_HOME/bin/vertx run jsonrpc.core.Server -conf $CONFIG -cp $CLASSPATH > $TMPDIR/$BASENAME.log 2>&1 &
+  PID=$!
+  
+  echo ""
+  
+  if [ `ps h $PID | wc -l` = 0 ]; then
+    echo "failed to start !!"
+    return 1
+  fi
+  
+  echo "start server: PID="$PID
+  echo $PID > $TMPDIR/$BASENAME.pid
+  return 0
+}
+
+stop() {
+  if [ -e $TMPDIR/$BASENAME.pid ]; then
+    PID=`cat $TMPDIR/$BASENAME.pid`
+    echo "stop server: PID="$PID
+    kill -TERM $PID
+    rm -rf $TMPDIR/$BASENAME.pid
+  else
+    echo "server not running"
+  fi
+  return 0
+}
+
+status() {
+  if [ -e $TMPDIR/$BASENAME.pid ]; then
+    echo "server running: PID="`cat $TMPDIR/$BASENAME.pid`
+  else
+    echo "server not running"
+  fi
+  return 0
+}
+
+case "$1" in
+"start")
+  start
+  ;;
+"stop")
+  stop
+  ;;
+"status")
+  status
+  ;;
+*)
+  echo "Usage: $BASENAME [start|stop|status]"
+  ;;
+esac
+
+exit $?
