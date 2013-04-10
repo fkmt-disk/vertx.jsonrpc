@@ -1,48 +1,58 @@
 package jsonrpc.core
 
 import collection.JavaConversions._
-
 import org.vertx.java.core.json.JsonObject
+import org.vertx.java.core.json.JsonArray
 
 object Test {
   
   def main(args: Array[String]): Unit = {
-    println("!")
     
-    val json = new JsonObject("""{
-        "hoge": "string",
-        "fuga": 123,
-        "piyo": false,
-        "foo": {
-          "aaa": "aaa",
-          "bbb": 456,
-          "ccc": {
-            "a": [1,2,3],
-            "b": {
-              "x": "stringstring",
-              "y": 789,
-              "z": true
-            }
-          }
-        }
-    }""")
-    
-    val map: Map[String, AnyRef] = json.toMap.toMap
-    
+    //--------------------------------------------------------------------------
+    // org.vertx.java.core.json.DecodeException:
+    //  Failed to decode:null
     /*
-    val map = Map("aaa"->123, "bbb"->"hoge")
-    val l = map.collect {
-      case (x:String, y:Any) => (null, null)
-    }*/
+    val j1 = new JsonObject(null.asInstanceOf[String])
+    println(j1)
+    */
     
+    
+    //--------------------------------------------------------------------------
+    // org.vertx.java.core.json.DecodeException:
+    //  Failed to decode:No content to map to Object due to end of input
+    /*
+    val j2 = new JsonObject("")
+    println(j2)
+    */
+    
+    
+    val j3 = new JsonObject("{}")
+    println(j3)
+    
+    
+    //--------------------------------------------------------------------------
+    // org.vertx.java.core.json.DecodeException:
+    //  Failed to decode:Can not deserialize instance of java.util.LinkedHashMap out of START_ARRAY token
+    /*
+    val j4 = new JsonObject("[]")
+    println(j4)
+    */
+    
+    
+    val j5 = new JsonObject("""{"hoge":[1,2,3]}""")
+    println(j5)
+    
+    
+    val j6 = new JsonArray("[1,2,3]")
+    println(j6)
+    
+    
+    val a1 = new JsonObject("""{"array":[1,2,3]}""").getElement("array")
+    println(a1.isInstanceOf[JsonArray])
+    
+    val a2 = new JsonObject("""{"array":{"one":1,"two":2}}""").getElement("array")
+    println(a2.isInstanceOf[JsonArray])
     
   }
-  
-  class Klass(json: JsonObject) {
-    
-    
-  }
-  
-  
   
 }
