@@ -1,9 +1,6 @@
 package jsonrpc.core
 
-import scala.Array.canBuildFrom
-
 import org.vertx.java.core.json.DecodeException
-import org.vertx.java.core.json.JsonArray
 import org.vertx.java.core.json.JsonObject
 
 import JsonRpcError.InternalError
@@ -48,15 +45,15 @@ class JsonRpcRequest private(json: JsonObject) {
   
   val params = json.getElement("params")
   
-  val id: AnyRef = json.getField("id") match {
+  val id: Option[AnyRef] = json.getField("id") match {
     case null =>
       if (json.getFieldNames.contains("id"))
         throw new JsonRpcException(InvalidRequest, "not allowed the `id` of null")
-      null
+      None
     case id: String =>
-      id
+      Option(id)
     case id: Integer =>
-      id
+      Option(id)
     case id: Number =>
       throw new JsonRpcException(InvalidRequest, "`id` must be string or integer")
   }
@@ -65,26 +62,7 @@ class JsonRpcRequest private(json: JsonObject) {
 
 object JsonRpcRequest {
   
-  type jmap = java.util.Map[String, Object]
-  
-  def parse(text: String): List[JsonRpcRequest] = text match {
-    case null =>
-      throw new JsonRpcException(ParseError, "no content")
-    case text if text.trim.length == 0 =>
-      throw new JsonRpcException(ParseError, "no content")
-    case text if text.trim.startsWith("{") =>
-      List(new JsonRpcRequest(text))
-    case text if text.trim.startsWith("[") =>
-      new JsonArray(text).toArray.collect {
-        case map: jmap =>
-          new JsonRpcRequest(map)
-        case what =>
-          throw new JsonRpcException(ParseError, s"unsupported type: ${what}")
-      } .toList
-      
-    case what =>
-      throw new JsonRpcException(ParseError, s"unsupported type: ${what}")
-  }
+  def parse(text: String) = new JsonRpcRequest(text)
   
   def findId(text: String): Option[AnyRef] = try {
     new JsonObject(text).getField("id") match {

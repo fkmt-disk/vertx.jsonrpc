@@ -1,19 +1,21 @@
 package jsonrpc.core
 
+import scala.Array.canBuildFrom
+
 import org.vertx.java.core.json.JsonObject
-import scala.collection.JavaConversions._
+
+import jsonrpc.core.JsonConverter.JavaMapToJson
 
 class Config(json: JsonObject) {
+  
+  private type TypedJavaMap = java.util.Map[String, AnyRef]
   
   val port = json.getInteger("port")
   
   val charset = json.getString("charset")
   
-  val workers = {
-    val workers = json.getObject("workers")
-    workers.getFieldNames.map { name =>
-      new WorkerConfig(workers.getObject(name))
-    }.toList
+  val workers = json.getArray("workers").toArray.collect {
+    case map: TypedJavaMap => new WorkerConfig(map.toJson)
   }
   
 }

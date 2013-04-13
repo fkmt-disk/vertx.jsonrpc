@@ -1,5 +1,8 @@
 package jsonrpc.core
 
+import java.util.{List => JavaList}
+import java.util.{Map => JavaMap}
+
 import scala.collection.mutable.{ListBuffer => MutableList}
 import scala.collection.mutable.{Map => MutableMap}
 
@@ -21,12 +24,20 @@ object JsonConverter {
     def toJson = new JsonObject(map.toJava)
   }
   
+  implicit class JavaMapToJson(map: JavaMap[String, AnyRef]) {
+    def toJson = new JsonObject(map)
+  }
+  
   implicit class ImmutableListToJson(list: List[Any]) {
     def toJson = new JsonArray(list.toJava)
   }
   
   implicit class MutableListToJson(list: MutableList[Any]) {
     def toJson = new JsonArray(list.toJava)
+  }
+  
+  implicit class JavaListToJson(list: JavaList[AnyRef]) {
+    def toJson = new JsonArray(list)
   }
   
 }

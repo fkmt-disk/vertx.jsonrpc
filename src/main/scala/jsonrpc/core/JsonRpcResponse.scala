@@ -11,38 +11,38 @@ object JsonRpcResponse {
   
   def contentType(charset: String) = s"application/json; charset=${charset}"
   
-  private def mkBase(id: AnyRef = null): JsonObject = {
+  private def pass = Unit
+  
+  private def mkBase(id: Option[AnyRef]): MutableMap[String, Any] = {
     val res: MutableMap[String, Any] = MutableMap()
     
     res += "jsonrpc" -> "2.0"
     
-    if (id != null)
-      res += "id" -> id
+    id match {
+      case Some(id) => res += "id" -> id
+      case None     => pass
+    }
     
-    res.toJson
+    res
   }
   
-  def makeResult(id: AnyRef, result: JsonElement): JsonObject = {
-    val json = mkBase(id)
+  def makeResult(id: Option[AnyRef], result: JsonElement): JsonObject = {
+    val base = mkBase(id)
     
     if (result.isArray)
-      json.putArray("result", result.asArray)
+      base += "result" -> result.asArray.toArray
     else
-      json.putObject("result", result.asObject)
+      base += "result" -> result.asObject.toMap
     
-    json
+    base.toJson
   }
   
-  def makeError(id: AnyRef, error: JsonObject): JsonObject = {
-    val json = mkBase(id)
-    json.putObject("error", error)
-    json
+  def makeError(id: Option[AnyRef], error: JsonObject): JsonObject = {
+    val base = mkBase(id)
+    base += "error" -> error.toMap
+    base.toJson
   }
   
-  def makeError(id: AnyRef, error: JsonRpcError, cause: Throwable=null): JsonObject = {
-    val json = mkBase(id)
-    json.putObject("error", new JsonRpcException(error, cause).toJson)
-    json
-  }
+  def makeError(id: Option[AnyRef], error: JsonRpcError, cause: Throwable=null): JsonObject = makeError(id, new JsonRpcException(error, cause).toJson)
   
 }

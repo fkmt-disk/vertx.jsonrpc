@@ -1,21 +1,27 @@
 package jsonrpc.core
 
 import org.vertx.java.core.buffer.Buffer
+import org.vertx.java.core.eventbus.Message
 import org.vertx.java.core.http.HttpServerRequest
+import org.vertx.java.core.json.JsonArray
 import org.vertx.java.core.json.JsonObject
 import org.vertx.java.deploy.Verticle
+
 import jsonrpc.core.JsonRpcError.InternalError
 import jsonrpc.core.JsonRpcRequest.findId
 import jsonrpc.core.JsonRpcResponse.contentType
-import jsonrpc.core.JsonRpcResponse._
-import jsonrpc.core.VertxAdaptor._
-import org.vertx.java.core.json.JsonArray
-import org.vertx.java.core.eventbus.Message
+import jsonrpc.core.JsonRpcResponse.makeError
+import jsonrpc.core.JsonRpcResponse.makeResult
+import jsonrpc.core.VertxAdaptor.EventBusWrapper
+import jsonrpc.core.VertxAdaptor.done
+import jsonrpc.core.VertxAdaptor.handler
 
 class Server extends Verticle {
   
   override def start(): Unit = {
     val log = container.getLogger
+    
+    val ebus = vertx.eventBus
     
     val config = new Config(container.getConfig)
     
@@ -28,8 +34,6 @@ class Server extends Verticle {
       )
     }
     
-    val ebus = vertx.eventBus
-    
     vertx.createHttpServer.requestHandler { req: HttpServerRequest =>
       val res = req.response
       
@@ -37,58 +41,41 @@ class Server extends Verticle {
         val text = body.toString
         
         val requests = try {
-          JsonRpcRequest.parse(text)
+          Option(JsonRpcRequest.parse(text))
         }
         catch {
           case e: JsonRpcException =>
             res.headers.put("Content-Type", contentType(config.charset))
             res.end(makeError(findId(text), e.toJson).toString)
-            Nil
+            None
           case t: Throwable =>
             res.headers.put("Content-Type", contentType(config.charset))
             res.end(makeError(findId(text), InternalError, t).toString)
-            Nil
+            None
         }
         
-        requests.foreach { r =>
-          
-          r.params match {
+        requests.foreach { jsonReq =>
+          jsonReq.params match {
             case param: JsonArray =>
-              ebus.post(r.method, param) { reply: Message[JsonArray] =>
+              ebus.post(jsonReq.method, param) { reply: Message[JsonArray] =>
                 res.headers.put("Content-Type", contentType(config.charset))
-                res.end(makeResult(r.id, reply.body).toString)
+                res.end(makeResult(jsonReq.id, reply.body).toString)
               }
             case param: JsonObject =>
-              ebus.post(r.method, param) { reply: Message[JsonObject] =>
+              ebus.post(jsonReq.method, param) { reply: Message[JsonObject] =>
                 res.headers.put("Content-Type", contentType(config.charset))
-                res.end(makeResult(r.id, reply.body).toString)
+                val body = reply.body
+                log.info(s"server reply: " + body)
+                res.end(makeResult(jsonReq.id, body).toString)
               }
             case null =>
-              ebus.post(r.method) { reply: Message[JsonObject] =>
+              ebus.post(jsonReq.method) { reply: Message[JsonObject] =>
                 res.headers.put("Content-Type", contentType(config.charset))
-                res.end(makeResult(r.id, reply.body).toString)
+                res.end(makeResult(jsonReq.id, reply.body).toString)
               }
           }
-          
-          
         }
-        
-        //println(body.toString)
-        
-        val json = new JsonObject(body.toString)
-        
-        println(json.toString)
-        
-        var qux = json.getArray("qux")
-        
-        var l = List("a","b","c")
-        val v = l(0)
       }
-      
-      
-      
-      res.headers.put("Content-Type", s"application/json; charset=${config.charset}")
-      res.end()
       
     } .listen(config.port)
     
