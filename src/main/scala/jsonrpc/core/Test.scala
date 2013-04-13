@@ -46,12 +46,24 @@ object Test {
     val j6 = new JsonArray("[1,2,3]")
     println(j6)
     
+    val j7 = new JsonArray("""[[1,2,3],{"a":1, "b":2, "c":3},{"d":4, "e":5, "f":6}]""")
+    println(j7)
+    val j7array = j7.toArray
+    println(j7array(0).getClass.getName)
+    
     
     val a1 = new JsonObject("""{"array":[1,2,3]}""").getElement("array")
     println(a1.isInstanceOf[JsonArray])
     
     val a2 = new JsonObject("""{"array":{"one":1,"two":2}}""").getElement("array")
     println(a2.isInstanceOf[JsonArray])
+    
+    val f1 = new JsonObject("""{"id1":123.456, "id2":123, "id3":"abcdef"}""")
+    println(f1.getField("id0"))
+    println(f1.getField("id1").getClass.getName)
+    println(f1.getField("id2").getClass.getName)
+    println(f1.getField("id3").getClass.getName)
+    
     
   }
   

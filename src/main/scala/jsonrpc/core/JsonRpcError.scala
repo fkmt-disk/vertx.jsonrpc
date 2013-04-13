@@ -41,6 +41,6 @@ object JsonRpcError {
 }
 
 sealed abstract class JsonRpcError(
-    val code: Int
+    val code: Integer
   , val name: String = getClass.getSimpleName
 )
