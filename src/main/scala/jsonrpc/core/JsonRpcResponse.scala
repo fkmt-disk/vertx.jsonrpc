@@ -7,6 +7,11 @@ import org.vertx.java.core.json.JsonObject
 
 import jsonrpc.core.JsonConverter.MutableMapToJson
 
+/**
+ * JsonRpcResponse.
+ * 
+ * @author fkmt.disk@gmail.com
+ */
 object JsonRpcResponse {
   
   def contentType(charset: String) = s"application/json; charset=${charset}"

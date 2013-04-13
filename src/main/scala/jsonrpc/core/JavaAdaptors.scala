@@ -8,6 +8,11 @@ import scala.collection.JavaConversions.seqAsJavaList
 import scala.collection.mutable.{ListBuffer => MutableList}
 import scala.collection.mutable.{Map => MutableMap}
 
+/**
+ * JavaAdaptors.
+ * 
+ * @author fkmt.disk@gmail.com
+ */
 object JavaAdaptors {
   
   implicit def bool2ref(b: Boolean) = b.asInstanceOf[java.lang.Boolean]

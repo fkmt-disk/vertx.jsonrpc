@@ -7,6 +7,11 @@ import org.vertx.java.core.json.JsonObject
 import org.vertx.java.core.eventbus.Message
 import org.vertx.java.core.json.JsonArray
 
+/**
+ * VertxAdaptor.
+ * 
+ * @author fkmt.disk@gmail.com
+ */
 object VertxAdaptor {
   
   def done(fn: () => Unit): Handler[String] = {

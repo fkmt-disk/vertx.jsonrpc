@@ -16,6 +16,11 @@ import jsonrpc.core.VertxAdaptor.EventBusWrapper
 import jsonrpc.core.VertxAdaptor.done
 import jsonrpc.core.VertxAdaptor.handler
 
+/**
+ * Server.
+ * 
+ * @author fkmt.disk@gmail.com
+ */
 class Server extends Verticle {
   
   override def start(): Unit = {

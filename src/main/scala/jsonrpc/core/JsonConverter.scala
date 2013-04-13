@@ -14,6 +14,11 @@ import jsonrpc.core.JavaAdaptors.ImmutableMapConverter
 import jsonrpc.core.JavaAdaptors.MutableListConverter
 import jsonrpc.core.JavaAdaptors.MutableMapConverter
 
+/**
+ * JsonConverter.
+ *
+ * @author fkmt.disk@gmail.com
+ */
 object JsonConverter {
   
   implicit class ImmutableMapToJson(map: Map[String, Any]) {

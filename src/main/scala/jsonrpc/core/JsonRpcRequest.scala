@@ -7,6 +7,11 @@ import JsonRpcError.InternalError
 import JsonRpcError.InvalidRequest
 import JsonRpcError.ParseError
 
+/**
+ * JsonRpcRequest.
+ * 
+ * @author fkmt.disk@gmail.com
+ */
 class JsonRpcRequest private(json: JsonObject) {
   
   def this(text: String) = this(

@@ -6,6 +6,11 @@ import org.vertx.java.core.json.JsonObject
 
 import JsonConverter.MutableMapToJson
 
+/**
+ * JsonRpcException.
+ * 
+ * @author fkmt.disk@gmail.com
+ */
 class JsonRpcException(
     _error: JsonRpcError
   , _message: String

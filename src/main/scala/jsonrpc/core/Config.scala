@@ -6,6 +6,11 @@ import org.vertx.java.core.json.JsonObject
 
 import jsonrpc.core.JsonConverter.JavaMapToJson
 
+/**
+ * Config.
+ * 
+ * @author fkmt.disk@gmail.com
+ */
 class Config(json: JsonObject) {
   
   private type TypedJavaMap = java.util.Map[String, AnyRef]
@@ -20,6 +25,11 @@ class Config(json: JsonObject) {
   
 }
 
+/**
+ * WorkerConfig.
+ * 
+ * @author fkmt.disk@gmail.com
+ */
 class WorkerConfig(json: JsonObject) {
   
   val className = json.getString("class_name")

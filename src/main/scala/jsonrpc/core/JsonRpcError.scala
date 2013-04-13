@@ -1,5 +1,10 @@
 package jsonrpc.core
 
+/**
+ * JsonRpcError.
+ * 
+ * @author fkmt.disk@gmail.com
+ */
 object JsonRpcError {
   
   /**
