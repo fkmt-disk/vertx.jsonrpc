@@ -7,6 +7,8 @@ import scala.collection.JavaConversions.mapAsJavaMap
 import scala.collection.JavaConversions.seqAsJavaList
 import scala.collection.mutable.{ListBuffer => MutableList}
 import scala.collection.mutable.{Map => MutableMap}
+import scala.language.implicitConversions
+
 
 /**
  * JavaAdaptors.

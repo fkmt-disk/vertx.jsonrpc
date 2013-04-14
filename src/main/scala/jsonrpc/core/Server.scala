@@ -12,6 +12,7 @@ import jsonrpc.core.JsonRpcRequest.findId
 import jsonrpc.core.JsonRpcResponse.contentType
 import jsonrpc.core.JsonRpcResponse.makeError
 import jsonrpc.core.JsonRpcResponse.makeResult
+import jsonrpc.core.VertxAdaptor.ContaninerWrapper
 import jsonrpc.core.VertxAdaptor.EventBusWrapper
 import jsonrpc.core.VertxAdaptor.done
 import jsonrpc.core.VertxAdaptor.handler
@@ -26,18 +27,15 @@ class Server extends Verticle {
   override def start(): Unit = {
     val log = container.getLogger
     
-    val ebus = vertx.eventBus
-    
     val config = new Config(container.getConfig)
     
-    config.workers.foreach { worker =>
-      container.deployWorkerVerticle(
-          worker.className
-        , worker.config
-        , worker.instances
-        , done(() => log.debug(s"${worker.name} has been deployed"))
-      )
+    config.workers.foreach { wk =>
+      container.deployWorker(wk.className, wk.config, wk.instances) { id: String =>
+        log.info(s"[Server] deployed worker; name=${wk.name}, id=$id")
+      }
     }
+    
+    val ebus = vertx.eventBus
     
     vertx.createHttpServer.requestHandler { req: HttpServerRequest =>
       val res = req.response
@@ -69,9 +67,7 @@ class Server extends Verticle {
             case param: JsonObject =>
               ebus.post(jsonReq.method, param) { reply: Message[JsonObject] =>
                 res.headers.put("Content-Type", contentType(config.charset))
-                val body = reply.body
-                log.info(s"server reply: " + body)
-                res.end(makeResult(jsonReq.id, body).toString)
+                res.end(makeResult(jsonReq.id, reply.body).toString)
               }
             case null =>
               ebus.post(jsonReq.method) { reply: Message[JsonObject] =>

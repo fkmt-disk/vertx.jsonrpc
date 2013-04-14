@@ -3,8 +3,10 @@ package jsonrpc.sample
 import org.vertx.java.core.eventbus.Message
 import org.vertx.java.core.json.JsonObject
 import org.vertx.java.deploy.Verticle
-
-import jsonrpc.core.VertxAdaptor.handler
+import jsonrpc.core.VertxAdaptor._
+import org.vertx.java.core.Handler
+import org.vertx.java.core.AsyncResult
+import org.vertx.java.core.AsyncResultHandler
 
 class AddService extends Verticle {
   
@@ -17,27 +19,30 @@ class AddService extends Verticle {
     
     val name = config.getString("name")
     
-    ebus.registerHandler(name, service)
+    ebus.regist(name, service) { result: AsyncResult[Void] =>
+      if (result.failed)
+        log.error(s"[AddService] registerHandler faild", result.exception)
+      else
+        log.info(s"[AddService] registered")
+    }
   }
   
   override def stop() {
     vertx.eventBus.unregisterHandler(container.getConfig.getString("name"), service)
   }
   
-  private val service = { message: Message[JsonObject] =>
-    val log = container.getLogger
-    
-    val body = message.body
-    
-    val num1 = body.getInteger("num1")
-    val num2 = body.getInteger("num2")
-    
-    val reply = new JsonObject
-    reply.putNumber("answer", num1 + num2)
-    
-    log.info(s"add relpy : ${reply}")
-    
-    message.reply(reply)
+  private val service = new Handler[Message[JsonObject]] {
+    override def handle(message: Message[JsonObject]) {
+      val body = message.body
+      
+      val num1 = body.getInteger("num1")
+      val num2 = body.getInteger("num2")
+      
+      val reply = new JsonObject
+      reply.putNumber("answer", num1 + num2)
+      
+      message.reply(reply)
+    }
   }
   
 }
